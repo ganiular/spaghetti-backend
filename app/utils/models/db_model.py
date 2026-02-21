@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field
@@ -15,6 +16,7 @@ class DBModel(BaseModel):
         default_factory=ObjectId, alias="_id", serialization_alias="id"
     )
     time_created: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    time_updated: Optional[datetime] = None
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,

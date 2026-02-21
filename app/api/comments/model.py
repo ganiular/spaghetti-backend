@@ -11,6 +11,10 @@ class CommentCreateForm(BaseModel):
     sender_id: str
 
 
+class CommentUpdateForm(BaseModel):
+    message: str
+
+
 class Comment(DBModel, CommentCreateForm):
     pass
 
