@@ -3,8 +3,8 @@ from app.api.comments.model import (
     CommentCreateForm,
     Comment,
 )
-from app.api.utils.models.py_object_id import PyObjectId
 from app.database import db
+from app.utils.models.py_object_id import PyObjectId
 
 
 class CommentService:

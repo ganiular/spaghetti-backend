@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.api.utils.models.py_object_id import PyObjectId
+from app.utils.models.py_object_id import PyObjectId
 
 
 class DBModel(BaseModel):
