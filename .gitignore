@@ -1,0 +1,85 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+
+# =========================
+# Virtual Environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+.virtualenvs/
+
+# Pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# =========================
+# Environment Variables
+# =========================
+.env
+*.env
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+uvicorn.log
+
+# =========================
+# FastAPI / Runtime
+# =========================
+*.sqlite3
+*.db
+
+# =========================
+# MongoDB
+# =========================
+dump/
+*.bson
+
+# =========================
+# Testing / Coverage
+# =========================
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# IDEs
+# =========================
+.idea/
+
+# =========================
+# Misc
+# =========================
+*.swp
+*.bak
+*.tmp
