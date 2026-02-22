@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, Request, status, logger
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.api.users.model import (
+    Email,
     LoginForm,
     RegisterForm,
     AuthenticatedUser,
@@ -21,6 +22,10 @@ http_bearer = HTTPBearer(auto_error=False)
 
 
 class UserService:
+    @staticmethod
+    async def create_index():
+        await db.users.create_index("email", unique=True)
+
     @staticmethod
     async def register_user(form: RegisterForm) -> AuthenticatedUser:
         # Check if user exists
@@ -98,3 +103,11 @@ class UserService:
         except Exception as e:
             logger.logger.error("require_user:", e)
             raise credentials_exception
+
+    @staticmethod
+    async def get_user_by_email(email: Email) -> User:
+        doc = await db.users.find_one({"email": email})
+        if doc:
+            return User(**doc)
+
+        raise HTTPException(status_code=404, detail="User not found")

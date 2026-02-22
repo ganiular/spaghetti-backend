@@ -6,14 +6,14 @@ from app.api.comments.model import (
     Comment,
     CommentUpdateForm,
 )
-from app.api.users.dependency import RequireUser
+from app.api.users.dependency import CurrentUser
 from app.database import db
 from app.utils.models.py_object_id import PyObjectId
 
 
 class CommentService:
     @staticmethod
-    async def create_comment(form: CommentCreateForm, author: RequireUser) -> Comment:
+    async def create_comment(form: CommentCreateForm, author: CurrentUser) -> Comment:
         data = form.model_dump()
         comment = Comment(author_id=author.id, **data)
         await db.comments.insert_one(comment.mongo_dump())

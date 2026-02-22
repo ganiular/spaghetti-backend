@@ -1,19 +1,15 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, BeforeValidator
 
 from app.utils.models.db_model import DBModel
-from app.utils.models.py_object_id import PyObjectId
+
+Email = Annotated[EmailStr, BeforeValidator(lambda x: x.lower().strip())]
 
 
 class LoginForm(BaseModel):
-    email: EmailStr
+    email: Email
     password: str = Field(..., min_length=6, max_length=128)
-
-    @field_validator("email")
-    @classmethod
-    def normalize_email(cls, v: str) -> str:
-        return v.lower().strip()
 
 
 class RegisterForm(LoginForm):
