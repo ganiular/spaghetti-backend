@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 fastapi = {extras = ["standard"], version = "*"}
 pydantic = "*"
+bcrypt = "*"
+pyjwt = "*"
 
 [dev-packages]
 

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.api import api_router
 from app import database
+from app.exceptions import register_exceptions
 
 
 @asynccontextmanager
@@ -17,6 +18,8 @@ async def db_lifespan(app: FastAPI):
 app = FastAPI(title="Spaghetti Backend", lifespan=db_lifespan)
 
 app.include_router(api_router)
+
+register_exceptions(app)
 
 
 @app.get("/")
