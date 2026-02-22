@@ -8,7 +8,6 @@ class CommentCreateForm(BaseModel):
     team_id: PyObjectId
     endpoint_id: str
     message: str
-    sender_id: str
 
 
 class CommentUpdateForm(BaseModel):
@@ -16,7 +15,7 @@ class CommentUpdateForm(BaseModel):
 
 
 class Comment(DBModel, CommentCreateForm):
-    pass
+    author_id: PyObjectId
 
 
 class CommentCollection(BaseModel):
