@@ -11,10 +11,10 @@ from app.api.teams.model import (
     TeamMemberRole,
 )
 from app.api.users.dependency import CurrentUser
-from app.api.users.model import Email
 from app.api.users.service import UserService
 from app.database import db
 from app.utils.models.py_object_id import PyObjectId
+from app.utils.models.types import Email
 
 
 class TeamService:

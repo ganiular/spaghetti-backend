@@ -5,7 +5,6 @@ from fastapi import Depends, HTTPException, Request, status, logger
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.api.users.model import (
-    Email,
     LoginForm,
     RegisterForm,
     AuthenticatedUser,
@@ -17,6 +16,7 @@ from app.api.users.password_hash import hash_password, verify_password
 from app.api.users.token import create_access_token, create_refresh_token, verify_token
 from app.database import db
 from app.exceptions import InvalidParameterException
+from app.utils.models.types import Email
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -100,8 +100,7 @@ class UserService:
                 raise HTTPException(status_code=401)
 
             return User(**user)
-        except Exception as e:
-            logger.logger.error("require_user:", e)
+        except Exception:
             raise credentials_exception
 
     @staticmethod

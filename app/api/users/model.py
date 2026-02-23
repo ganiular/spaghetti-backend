@@ -1,10 +1,9 @@
-from typing import Annotated, Optional
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, BeforeValidator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.utils.models.db_model import DBModel
-
-Email = Annotated[EmailStr, BeforeValidator(lambda x: x.lower().strip())]
+from app.utils.models.types import Email
 
 
 class LoginForm(BaseModel):
