@@ -1,9 +1,8 @@
-from enum import Enum
-
 from pydantic import BaseModel
 
 from app.utils.models.db_model import DBModel
 from app.utils.models.py_object_id import PyObjectId
+from app.utils.models.types import OrderedStrEnum
 
 
 class TeamCreateForm(BaseModel):
@@ -14,7 +13,7 @@ class Team(DBModel, TeamCreateForm):
     creator_id: PyObjectId
 
 
-class TeamMemberRole(str, Enum):
+class TeamMemberRole(OrderedStrEnum):
     CREATOR = "creator"
     ADMIN = "admin"
     MEMBER = "member"
