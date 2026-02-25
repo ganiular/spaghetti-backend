@@ -8,6 +8,8 @@ from app.api.teams.model import (
     Team,
     TeamCreateForm,
     TeamMember,
+    TeamMemberCollection,
+    TeamMemberInDB,
     TeamMemberRole,
 )
 from app.api.users.dependency import CurrentUser
@@ -33,7 +35,7 @@ class TeamService:
         team = Team(creator_id=creator.id, **form.model_dump())
         await db.teams.insert_one(team.mongo_dump())
 
-        team_member = TeamMember(
+        team_member = TeamMemberInDB(
             member_id=creator.id, team_id=team.id, role=TeamMemberRole.CREATOR
         )
 
@@ -57,12 +59,12 @@ class TeamService:
         member_email: Annotated[Email, Body(embed=False)],
         user: CurrentUser,
         db: Database,
-    ) -> TeamMember:
+    ) -> TeamMemberInDB:
         await TeamService.require_team_role(team_id, user.id, TeamMemberRole.ADMIN, db)
 
         member = await UserService.get_user_by_email(member_email, db)
 
-        team_member = TeamMember(
+        team_member = TeamMemberInDB(
             role=TeamMemberRole.MEMBER, team_id=team_id, member_id=member.id
         )
 
@@ -76,7 +78,9 @@ class TeamService:
         return team_member
 
     @staticmethod
-    async def get_team_members(team_id: PyObjectId, user: CurrentUser, db: Database):
+    async def get_team_members(
+        team_id: PyObjectId, user: CurrentUser, db: Database
+    ) -> TeamMemberCollection:
         # Authorization: must be at least MEMBER
         await TeamService.require_team_role(team_id, user.id, TeamMemberRole.MEMBER, db)
 
@@ -103,7 +107,8 @@ class TeamService:
         ]
 
         cursor = await db.team_members.aggregate(pipeline)
-        return [doc async for doc in cursor]
+        team_members = TeamMemberCollection(members=await cursor.to_list(1000))
+        return team_members
 
     @staticmethod
     async def require_team_role(
@@ -114,7 +119,7 @@ class TeamService:
         )
 
         if member_doc:
-            member = TeamMember(**member_doc)
+            member = TeamMemberInDB(**member_doc)
             if member.role >= min_role:
                 return
 

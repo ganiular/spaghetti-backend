@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.utils.models.db_model import DBModel
+from app.utils.models.db_model import AppBaseModel, DBModel
 from app.utils.models.py_object_id import PyObjectId
 from app.utils.models.types import OrderedStrEnum
 
@@ -19,7 +19,18 @@ class TeamMemberRole(OrderedStrEnum):
     MEMBER = "member"
 
 
-class TeamMember(DBModel):
+class TeamMemberInDB(DBModel):
     team_id: PyObjectId
     member_id: PyObjectId
     role: TeamMemberRole
+
+
+class TeamMember(AppBaseModel):
+    member_id: PyObjectId
+    role: TeamMemberRole
+    name: str
+    email: str
+
+
+class TeamMemberCollection(BaseModel):
+    members: list[TeamMember]
