@@ -1,23 +1,32 @@
-import logging
+from typing import Annotated
 
-from fastapi import FastAPI
-
-from app.config import settings
+from fastapi import FastAPI, Request, Depends
 from pymongo import AsyncMongoClient
+from pymongo.asynchronous.database import AsyncDatabase
+from app.config import settings
 
-client = AsyncMongoClient(settings.MONGODB_URL)
-db = client[settings.DB_NAME]
 
+async def open_connection(app: FastAPI) -> AsyncDatabase:
+    client = AsyncMongoClient(settings.MONGODB_URL)
+    db = client[settings.DB_NAME]
 
-async def open_connection(app: FastAPI):
-    app.mongodb_client = client
-    app.database = db
-    ping_response = await app.database.command("ping")
-    if int(ping_response["ok"]) != 1:
-        raise Exception("Problem connecting to database cluster.")
-    else:
-        logging.info("Connected to database cluster.")
+    app.state.mongodb_client = client
+    app.state.database = db
+
+    # Ensure connection
+    await db.command("ping")
+
+    print("Database connected")
+    return db
 
 
 async def close_connection(app: FastAPI):
-    await app.mongodb_client.close()
+    await app.state.mongodb_client.close()
+
+
+def _get_db(request: Request) -> AsyncDatabase:
+    return request.app.state.database
+
+
+# Database depend
+Database = Annotated[AsyncDatabase, Depends(_get_db)]

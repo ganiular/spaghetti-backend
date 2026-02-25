@@ -14,7 +14,7 @@ from app.api.users.model import (
 )
 from app.api.users.password_hash import hash_password, verify_password
 from app.api.users.token import create_access_token, create_refresh_token, verify_token
-from app.database import db
+from app.database import Database
 from app.exceptions import InvalidParameterException
 from app.utils.models.types import Email
 
@@ -23,11 +23,11 @@ http_bearer = HTTPBearer(auto_error=False)
 
 class UserService:
     @staticmethod
-    async def create_index():
+    async def create_indexes(db: Database):
         await db.users.create_index("email", unique=True)
 
     @staticmethod
-    async def register_user(form: RegisterForm) -> AuthenticatedUser:
+    async def register_user(form: RegisterForm, db: Database) -> AuthenticatedUser:
         # Check if user exists
         existing_user = await db.users.find_one({"email": form.email})
         if existing_user:
@@ -55,7 +55,7 @@ class UserService:
         )
 
     @staticmethod
-    async def login_user(form: LoginForm) -> AuthenticatedUser:
+    async def login_user(form: LoginForm, db: Database) -> AuthenticatedUser:
         if userdata := await db.users.find_one({"email": form.email}):
             user = UserWithPassword(**userdata)
             if verify_password(form.password, user.password_hash):
@@ -79,6 +79,7 @@ class UserService:
     @staticmethod
     async def require_user(
         authorization: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
+        db: Database,
     ) -> User:
 
         credentials_exception = HTTPException(
@@ -104,7 +105,7 @@ class UserService:
             raise credentials_exception
 
     @staticmethod
-    async def get_user_by_email(email: Email) -> User:
+    async def get_user_by_email(email: Email, db: Database) -> User:
         doc = await db.users.find_one({"email": email})
         if doc:
             return User(**doc)
