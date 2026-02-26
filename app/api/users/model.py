@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.utils.models.db_model import DBModel
+from app.utils.models.py_object_id import PyObjectId
 from app.utils.models.types import Email
 
 
@@ -30,6 +32,13 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+
+
+class RefreshTokenInDB(DBModel):
+    user_id: PyObjectId
+    token: str  # this is jti
+    time_expires: datetime
+    revoked: bool = False
 
 
 class User(DBModel):

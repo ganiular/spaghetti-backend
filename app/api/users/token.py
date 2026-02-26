@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 from typing import Any
+from uuid import uuid4
 from app.config import settings
 import jwt
 
 
-def create_access_token(user_id: str) -> str:
+def encode_access_token(user_id: str) -> str:
     payload = {
         "sub": user_id,
         "type": "access",
@@ -13,16 +15,30 @@ def create_access_token(user_id: str) -> str:
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
 
 
-def create_refresh_token(user_id: str) -> str:
+def encode_refresh_token(user_id: str) -> tuple[str, str, datetime]:
+    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_EXPIRE_DAYS)
+
+    jti = str(uuid4())
+
     payload = {
         "sub": user_id,
         "type": "refresh",
-        "exp": datetime.now(timezone.utc)
-        + timedelta(days=settings.REFRESH_EXPIRE_DAYS),
+        "jti": jti,
+        "exp": expire,
     }
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
+
+    token = jwt.encode(
+        payload, settings.JWT_REFRESH_SECRET, algorithm=settings.ALGORITHM
+    )
+
+    return token, jti, expire
 
 
-def verify_token(token: str) -> dict[str:Any]:
-    payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
-    return payload
+def decode_token(token: str, type: str) -> dict[str, Any]:
+    if type == "access":
+        return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+    elif type == "refresh":
+        return jwt.decode(
+            token, settings.JWT_REFRESH_SECRET, algorithms=[settings.ALGORITHM]
+        )
+    return {}
