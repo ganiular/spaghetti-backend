@@ -1,12 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.utils.models.db_model import AppBaseModel, DBModel
 from app.utils.models.py_object_id import PyObjectId
-from app.utils.models.types import OrderedStrEnum
+from app.utils.models.types import OrderedStrEnum, TrimedStr
 
 
 class TeamCreateForm(BaseModel):
-    name: str
+    name: TrimedStr = Field(..., min_length=2)
 
 
 class Team(DBModel, TeamCreateForm):

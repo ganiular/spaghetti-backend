@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.utils.models.db_model import DBModel
 from app.utils.models.py_object_id import PyObjectId
-from app.utils.models.types import Email
+from app.utils.models.types import Email, TrimedStr
 
 
 class LoginForm(BaseModel):
@@ -14,7 +14,7 @@ class LoginForm(BaseModel):
 
 
 class RegisterForm(LoginForm):
-    name: str
+    name: TrimedStr = Field(min_length=2)
 
     @field_validator("password")
     @classmethod

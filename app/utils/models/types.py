@@ -5,6 +5,7 @@ from pydantic import BeforeValidator, EmailStr
 
 
 Email = Annotated[EmailStr, BeforeValidator(lambda x: str(x).lower().strip())]
+TrimedStr = Annotated[str, BeforeValidator(lambda x: str(x).strip())]
 
 
 class OrderedStrEnum(StrEnum):
