@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from app.api import api_router
 from app import database
 from app.api.comments.service import CommentService
+from app.api.team_members.service import TeamMemberService
 from app.api.teams.service import TeamService
 from app.api.users.service import UserService
 from app.exceptions import register_exceptions
@@ -17,6 +18,7 @@ async def db_lifespan(app: FastAPI):
     # Create database indexes
     await UserService.create_indexes(db)
     await TeamService.create_indexes(db)
+    await TeamMemberService.create_indexes(db)
     await CommentService.create_indexes(db)
 
     yield
