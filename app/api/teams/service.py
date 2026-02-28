@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import re
 
 from fastapi import HTTPException
@@ -32,6 +33,7 @@ class TeamService:
             {
                 "creator_id": team.creator_id,
                 "name": {"$regex": f"^{re.escape(team.name)}$", "$options": "i"},
+                "deleted": {"$ne": True},
             }
         )
         if existing:
@@ -50,11 +52,13 @@ class TeamService:
 
     @staticmethod
     async def my_teams(user: CurrentUser, db: Database) -> list[Team]:
-        memberships = db.team_members.find({"member_id": user.id}, {"team_id": 1})
+        memberships = db.team_members.find(
+            {"member_id": user.id, "deleted": {"$ne": True}}, {"team_id": 1}
+        )
 
         team_ids = [doc["team_id"] async for doc in memberships]
 
-        teams = db.teams.find({"_id": {"$in": team_ids}})
+        teams = db.teams.find({"_id": {"$in": team_ids}, "deleted": {"$ne": True}})
 
         return [Team(**doc) async for doc in teams]
 
@@ -66,7 +70,7 @@ class TeamService:
         require_admin: CurrentTeamAdmin,
     ) -> Team:
         result = await db.teams.find_one_and_update(
-            {"_id": team_id},
+            {"_id": team_id, "deleted": {"$ne": True}},
             {"$set": form.model_dump(exclude_unset=True)},
             return_document=ReturnDocument.AFTER,
         )
@@ -79,6 +83,16 @@ class TeamService:
     async def delete_team(
         team_id: PyObjectId, db: Database, reqiure_creator: CurrentTeamCreator
     ) -> None:
-        result = await db.teams.delete_one({"_id": team_id})
-        if result.deleted_count == 0:
+        result = await db.comments.update_one(
+            {"_id": team_id},
+            {
+                "$set": {
+                    "deleted": True,
+                    "time_deleted": datetime.now(timezone.utc),
+                    "deleted_by": reqiure_creator.member_id,
+                }
+            },
+        )
+
+        if result.modified_count == 0:
             raise HTTPException(404, "Team not found")

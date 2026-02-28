@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import Body, HTTPException
@@ -94,7 +95,7 @@ class TeamMemberService:
         current_admin: CurrentTeamAdmin,
     ) -> TeamMemberInDB:
         member_doc = await db.team_members.find_one(
-            {"team_id": team_id, "member_id": member_id}
+            {"team_id": team_id, "member_id": member_id, "deleted": {"$ne": True}}
         )
 
         if member_doc:
@@ -103,7 +104,7 @@ class TeamMemberService:
                 raise HTTPException(403, "Cannot change creator role")
 
             doc = await db.team_members.find_one_and_update(
-                {"_id": member_doc["_id"]},
+                {"_id": member.id, "deleted": {"$ne": True}},
                 {"$set": form.model_dump(exclude_unset=True)},
                 return_document=ReturnDocument.AFTER,
             )
@@ -119,12 +120,18 @@ class TeamMemberService:
         db: Database,
         # Require admin action
         current_admin: CurrentTeamAdmin,
-    ) -> str:
-
-        result = await db.team_members.delete_one(
-            {"team_id": team_id, "member_id": member_id}
+    ) -> None:
+        filter = {"team_id": team_id, "member_id": member_id}
+        result = await db.comments.update_one(
+            filter,
+            {
+                "$set": {
+                    "deleted": True,
+                    "time_deleted": datetime.now(timezone.utc),
+                    "deleted_by": current_admin.member_id,
+                }
+            },
         )
-        if result.deleted_count == 0:
-            raise HTTPException(404, "Team member not found")
 
-        return "deleted"
+        if result.modified_count == 0:
+            raise HTTPException(404, "Team member not found")

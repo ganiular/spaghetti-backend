@@ -1,7 +1,8 @@
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import BeforeValidator, EmailStr
+from fastapi import Query
+from pydantic import BaseModel, BeforeValidator, EmailStr, Field
 
 
 Email = Annotated[EmailStr, BeforeValidator(lambda x: str(x).lower().strip())]
@@ -28,3 +29,11 @@ class OrderedStrEnum(StrEnum):
 
     def __ge__(self, other):
         return self == other or self > other
+
+
+class _Pagination(BaseModel):
+    limit: int = Field(50, ge=1, le=100, description="Max number of items to return")
+    skip: int = 100
+
+
+Pagination = Annotated[_Pagination, Query()]

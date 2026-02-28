@@ -15,7 +15,7 @@ async def _require_team_role(
     db: Database,
 ) -> TeamMemberInDB:
     member_doc = await db.team_members.find_one(
-        {"team_id": team_id, "member_id": current_user.id}
+        {"team_id": team_id, "member_id": current_user.id, "deleted": {"$ne": True}}
     )
 
     if member_doc:

@@ -35,4 +35,5 @@ class DBModel(AppBaseModel):
     def mongo_dump(self):
         data = self.model_dump()
         data["_id"] = data.pop("id")
+        data.setdefault("deleted", False)
         return data
